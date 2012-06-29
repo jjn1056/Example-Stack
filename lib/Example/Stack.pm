@@ -2,31 +2,32 @@ package Example::Stack;
 
 use Moose;
 
-has 'stack' => (
+has stack => (
   traits  => ['Array'],
   is => 'bare',
   default => sub { [] },
   handles => {
     push => 'push',
     pop => 'pop',
-    sort => 'sort' },
+    sort => ['sort' =>
+      sub { $_[0] <=> $_[1] }], },
 );
 
-has 'min_trace' => (
+has min_trace => (
   traits  => ['Array'],
   is => 'bare',
   default => sub { [] },
   handles => {
     push_min_trace => 'push',
     pop_min_trace => 'pop',
-    get_min_trace_at => 'get' },
+    min_fast => ['get'=>'-1'], },
 );
 
 around push => sub {
   my ($orig, $self, $pushed) = @_;
-  if(!defined $self->min_fast) {
-    $self->push_min_trace($pushed);
-  } elsif($self->min_fast >= $pushed) {
+  if(!defined $self->min_fast ||
+    $self->min_fast >= $pushed)
+  {
     $self->push_min_trace($pushed);
   }
   return $self->$orig($pushed);
@@ -41,15 +42,6 @@ around pop => sub {
   return $popped;
 };
 
-sub min_naive {
-  my $self = shift;
-  my @sorted = $self->sort(
-    sub { $_[0] <=> $_[1] });
-  return shift @sorted;
-}
-
-sub min_fast {
-  shift->get_min_trace_at(-1);
-}
+sub min_naive { (shift->sort)[0] }
 
 __PACKAGE__->meta->make_immutable;
