@@ -10,7 +10,7 @@ has stack => (
   handles => {
     push => 'push',
     pop => 'pop',
-    sort => ['sort' =>
+    sort_desc => ['sort' =>
       sub { $_[0] <=> $_[1] }], },
 );
 
@@ -43,7 +43,7 @@ around pop => sub {
   return $popped;
 };
 
-sub min_naive { (shift->sort)[0] }
+sub min_naive { (shift->sort_desc)[0] }
 
 __PACKAGE__->meta->make_immutable;
 
